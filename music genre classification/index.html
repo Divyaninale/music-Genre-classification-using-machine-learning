@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Genre Classification</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            background-color: #a18f8f5e; /* Dark bluish background color */
+            height: 100vh;
+            font-family: cursive;
+        }
+
+        #container {
+            margin-top: 10px;
+            padding: 30px;
+            background-color: #254d4e; /* Blackish color */
+            border-radius: 2px;
+            width: 60%;
+            height: 40%;
+        }
+
+        .p-heading {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #fff; /* Text color */
+        }
+
+        #uploadForm {
+            margin-top: 20px;
+            color: #fff; /* Text color */
+        }
+
+        input[type="file"] {
+            margin-right: 10px;
+            background-color: #fff; /* File input background color */
+            color: #000; /* File input text color */
+            padding: 10px; /* File input padding */
+            border: none; /* Remove default border */
+            border-radius: 2px; /* Add border radius */
+            font-family: cursive;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #classificationResults {
+            margin-top: 30px;
+            font-weight: bold;
+            color: #fff; /* Text color */
+            background-color: #406667;
+            padding: 5px;
+        }
+
+        #graphContainer {
+            margin-top: 15%;
+            margin-bottom:50px;
+            padding-bottom:30px;
+            display: none; /* Hide initially */
+        }
+
+        #graphImage {
+            max-width: 100%;
+            height: auto;
+            display: block; /* Ensure the image is displayed as a block element */
+            margin: 0 auto; /* Center the image horizontally */
+            max-height: calc(100% - 40px); /* Ensure the image fits within the container */
+        }
+    </style>
+</head>
+<body>
+<div id="container">
+    <div class="p-heading p-large">Here you can upload your music file to check the genre of the music.</div>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" id="fileInput" name="file" accept=".wav">
+        <button type="button" id="classifyButton">Classify</button>
+    </form>
+
+    <div id="classificationResults"></div>
+
+    <div id="graphContainer">
+        <img id="graphImage" src="" alt="Prediction Accuracy" />
+    </div>
+</div>
+
+<script>
+    document.getElementById('classifyButton').addEventListener('click', function () {
+        var fileInput = document.getElementById('fileInput');
+        var file = fileInput.files[0];
+        var formData = new FormData();
+        formData.append('file', file);
+
+        fetch('/classify', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.text())
+            .then(data => {
+                console.log(data); // Log the response from the server
+                // Display the response on the webpage
+                document.getElementById('classificationResults').innerText = data;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Handle errors here
+            });
+    });
+
+    // Fetch and display the graph on page load
+    window.onload = function () {
+        fetch('/metrics', {
+            method: 'GET'
+        })
+            .then(response => response.blob())
+            .then(data => {
+                // Create object URL for the blob
+                var url = URL.createObjectURL(data);
+                // Display the graph image
+                document.getElementById('graphImage').src = url;
+                document.getElementById('graphContainer').style.display = 'block'; // Show the container
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Handle errors here
+            });
+    };
+</script>
+</body>
+</html>
